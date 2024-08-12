@@ -6,7 +6,7 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 
@@ -230,6 +230,8 @@ def get_product(product_id):
 
 # CREATE OR ADD ITEM
 @app.route("/products", methods=["POST"])
+# Authentication required to create or add item
+@jwt_required()
 def add_product():
     product_fields = request.get_json()
 
@@ -248,6 +250,7 @@ def add_product():
 # UPDATE
 # Use dynamic routes 
 @app.route("/products/<int:product_id>", methods=["PUT", "PATCH"])
+@jwt_required()
 def update_product(product_id):
     # Find the product from the database with the specific id, product_id
     stmt = db.select(Product).filter_by(id=product_id) # Create the function
@@ -266,9 +269,15 @@ def update_product(product_id):
     else:
         return {"error": f"Product with id {product_id} doesn't exist"}, 404
     
-# DELETE
+# DELETE, only ADMIN users can delete products
 @app.route("/products/<int:product_id>", methods=["DELETE"])
+@jwt_required()
 def delete_product(product_id):
+
+    is_admin = authoriseAsAdmin()
+    if not is_admin:
+        return {"error": "Not authorised to delete a product"}, 403
+    
     stmt = db.select(Product).filter_by(id=product_id) # create the stmt 
     product = db.session.scalar(stmt) # execute the statement
 
@@ -279,4 +288,14 @@ def delete_product(product_id):
     else:
         return {"error": f"Product with id {product_id} doesn't exist"}, 404
         
-
+# Create another function that only allows ADMIN users to delete
+def authoriseAsAdmin():
+    # Get the ID of the user from the JWT token
+    user_id = get_jwt_identity()
+    # Find the user in the DB with this ID
+    # db = object. Select everything from the USER table (model) where ID=user_id
+    stmt = db.select(User).filter_by(id=user_id)
+    # Execute it and stores value in user's variable
+    user = db.session.scalar(stmt)
+    # Check whether the user is an admin or not
+    return user.is_admin

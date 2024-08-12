@@ -19,4 +19,10 @@ Steps to define ROUTES
 ## Authentication  
 
 Steps
-* Create an user model
+* Create objects for B.crypt and for JWT 
+* Create a class USER, have attributes can be used for Authorization purposes = Boolean value
+* Encrypt password using b.crypt (sensitive data)
+* Create UserSchema and define fields under meta class
+* Create Schema objects to fetch a singular or multiple values, exclude = password in user/users_schemas
+* Create a register route, when user register you hash their password and stores the hashed value in the DT.
+* When user logins in, you check hashed values and ID, if it matches you create the TOKEN and returns the values.
