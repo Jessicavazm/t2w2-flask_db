@@ -1,6 +1,6 @@
 # t2w2-flask_db
 
-Steps
+## Flask and API
 
 First import flask and request, import SQLAlchemy to connect database to API and Marshmallow to convert the data objects to Python understandable objects.
 
@@ -15,3 +15,8 @@ Steps to define ROUTES
 * If it's a POST request, you need to ADD() and COMMIT()
 * If it's the other requests such as UPDATE or DELETE you just need to COMMIT(), since you already fetch info from DB.
 * RETURN something using schemas(made from Marshmallow library) to DUMP, this convert the schema value into Python understandable format (Sends the VALUE back to FRONTEND).
+
+## Authentication  
+
+Steps
+* Create an user model
